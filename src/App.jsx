@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Header } from './components/Header.jsx';
 import { Users } from './components/Users.jsx';
+import { TransitionContext } from './context/index.jsx';
 import { getUsers } from './repositories/users.js';
 
 export function App() {
@@ -8,16 +9,26 @@ export function App() {
   const [activeFilter, setActiveFilter] = useState('');
   const [users, setUsers] = useState(/** @param {any[]}  */ []);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const originalUsers = useRef(/** @param {any[]}  */ []);
+  const { transitionState, setTransitionState } = useContext(TransitionContext);
 
   useEffect(() => {
-    getUsers().then((d) => {
-      setUsers(d);
-      originalUsers.current = d;
+    setTransitionState((prev) => ({ ...prev, isLoading: true }));
+    getUsers(page).then((data) => {
+      const finalUsers = users.concat(data);
+      setUsers(finalUsers);
+      originalUsers.current = finalUsers;
+      setTransitionState((prev) => ({
+        ...prev,
+        isLoading: false,
+        loaded: true,
+      }));
     });
-  }, []);
+  }, [page]);
 
   const resetUsers = () => {
+    setActiveFilter('');
     setUsers(originalUsers.current);
   };
 
@@ -78,6 +89,10 @@ export function App() {
   const toggleColor = () => {
     setIsColored(!isColored);
   };
+
+  const getMoreResults = () => {
+    setPage((prev) => prev + 1);
+  };
   return (
     <>
       <Header
@@ -86,13 +101,23 @@ export function App() {
         reset={resetUsers}
         searchByCountry={searchByCountry}
       />
-      <main>
+      <main className="flex flex-col justify-center gap-y-6">
         <Users
           users={sortedUsers}
           deleteOne={deleteUser}
           isColored={isColored}
           changeFilter={changeFilter}
         />
+
+        {transitionState.isLoading && <p> Loading ...</p>}
+
+        <button
+          className="rounded bg-gray-700 text-gray-100 py-3 px-6 mx-auto my-6"
+          disabled={transitionState.isLoading}
+          onClick={getMoreResults}
+        >
+          Load more ...
+        </button>
       </main>
     </>
   );

@@ -9,23 +9,19 @@
 
 const API_BASE_URL = 'https://randomuser.me';
 const USERS_ENDPOINT = '/api/';
+const MY_FULLY_SECURE_SEED = 'R4nDm$up3rS3cuR3533d';
 
-const DESIRED_RESULTS = 100;
-
-/** @type {User[]} */
-const users = [];
+const DESIRED_RESULTS = 10;
 
 /**
  * @returns {Promise<User[]>}
  */
-export const getUsers = (desiredResults = DESIRED_RESULTS) => {
-  if (users && users.length === DESIRED_RESULTS) {
-    return Promise.resolve(users);
-  }
-
+export const getUsers = (page = 1) => {
   const url = new URL(USERS_ENDPOINT, API_BASE_URL);
   const params = new URLSearchParams({
-    results: desiredResults,
+    results: DESIRED_RESULTS,
+    seed: MY_FULLY_SECURE_SEED,
+    page,
   });
 
   url.search = params.toString();
