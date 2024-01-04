@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "jsx": "preserve",
+    "noEmit": true
+  },
+  "include": ["src/**/*"]
+}
